@@ -5,12 +5,16 @@ import sys
 import vlc
 import gpio as GPIO
 import subprocess
+import pyttsx3
 #import smbus
 from smbus2 import SMBus
 from pydub import AudioSegment
 sys.path.insert(0, '/home/rock/Desktop/Hearsight/')
 from play_audio import GTTSA
 
+engine = pyttsx3.init()
+engine.setProperty('voice', 'en-gb')
+engine.setProperty('rate', 140)
 play_audio = GTTSA()
 GPIO.setup(448, GPIO.IN)  # Exit Button
 bus = SMBus(3)
@@ -48,7 +52,10 @@ def main():
                 distance_m = distance_mm / 1000.0  # Convert mm to meters
 #                print(f"distance={distance_m}m")
                 distance_ft = distance_m * meter_to_feet  # Convert meters to feet
+                distance = str(distance_ft).split(".")
+                distance = distance[0]
                 print(f"Distance = {distance_ft} Feet")
+                print(f"Distance = {distance} Feet")
 #                print ("  Distance : %.1f ft" % distance_ft)
 #                distance_ft = round(distance_ft)
 #                print("Distance in Feet:", distance_ft)
@@ -61,6 +68,8 @@ def main():
                     time.sleep(1.25)
                     media.stop()
                     print("ALERT!!!")
+                    engine.say(f'alert obstacle at {distance} feet distance')
+                    engine.runAndWait()
                     
 #                elif 0.9144 <= distance_m <= 1.2192: #3 to 4 feet
                 elif 3 <= distance_ft <= 4:  # 3 to 4 feet
@@ -69,6 +78,8 @@ def main():
                     time.sleep(1.25)
                     media.stop()
                     print("STOP!!!")
+                    engine.say(f'stop obstacle at {distance} feet distance')
+                    engine.runAndWait()
 
                 input_state = GPIO.input(448)
                 if input_state:
